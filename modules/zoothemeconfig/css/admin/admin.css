@@ -1,0 +1,47 @@
+.tab-content .tab-pane{
+    display: none;
+}
+.tab-content .tab-pane.active{
+    display: block;
+}
+#options_tab .active a{
+    z-index: 2;
+    color: white;
+    background-color: #00aff0;
+    border-color: #00aff0;
+}
+div.listpattern{
+    float:left;overflow: hidden;
+}
+div.list_pattern_page_pattern span.item,
+div.list_pattern_header_pattern span.item,
+div.list_pattern_footer_pattern span.item,
+div.list_pattern_main_wrapper_patterns span.item{
+    overflow:hidden;
+    width: 50px;
+    float:left;
+    text-align: center;
+    margin:0 6px 6px 0px;
+}
+div.list_pattern_page_pattern span.item img,
+div.list_pattern_header_pattern span.item img,
+div.list_pattern_footer_pattern span.item img,
+div.list_pattern_main_wrapper_patterns span.item img{
+    width: 50px;
+    height: 50px;
+}
+div.list_pattern_page_pattern span.item .ptnone,
+div.list_pattern_header_pattern span.item .ptnone,
+div.list_pattern_footer_pattern span.item .ptnone,
+div.list_pattern_main_wrapper_patterns span.item .ptnone {
+    background: #f1f1f1;
+    width: 50px;
+    height: 50px;
+    display:block;
+    line-height:50px;
+    color:#999;
+}
+.form-group label.group-control-label {
+    border-bottom: #dfdfdf solid 1px;
+    padding: 5px 0;
+}
