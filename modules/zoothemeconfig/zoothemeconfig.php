@@ -269,8 +269,16 @@ class ZooThemeConfig extends Module
 
 	public function hookHeader($params)
 	{
-        $theme_settings = array();
+        $id_shop = (int)$this->context->shop->id;
+        $theme_settings = array(
+            "product_columns" => (Configuration::get($this->configName.'_category_view_grid_column_count')),
+        );
         $this->context->smarty->assign('zootheme_vars', $theme_settings);
+        if (Shop::getContext() == Shop::CONTEXT_GROUP)
+            $this->context->controller->addCSS(($this->_path) . 'css/stylecf_'.(int)$this->context->shop->getContextShopGroupID().'.css', 'all');
+        elseif (Shop::getContext() == Shop::CONTEXT_SHOP)
+            $this->context->controller->addCSS(($this->_path) . 'css/stylecf_'.(int)$this->context->shop->getContextShopID().'.css', 'all');
+        $this->context->controller->addCSS(($this->_path) . 'css/custom.css', 'all');
 	}
 
 	public function renderForm()
@@ -1756,18 +1764,72 @@ class ZooThemeConfig extends Module
         return $options;
     }
 
+    public function getCssGridItem($columnCount)
+    {
+        $_itemWidth = array(
+            "1" => 99,
+            "2" => 49,
+            "3" => 32,
+            "4" => 23.499,
+            "5" => 18.4,
+            "6" => 15,
+            "7" => 12.5555,
+            "8" => 10.752,
+        );
+
+        $out = "\n";
+        $out .= '.itemgrid.itemgrid-adaptive .item { width:' . $_itemWidth[$columnCount] . '%; clear:none !important; }' . "\n";
+
+        if ($columnCount > 1)
+        {
+            $out .= '.itemgrid.itemgrid-adaptive .item:nth-child(' . $columnCount . 'n+1) { clear:left !important; }' . "\n";
+        }
+
+        return $out;
+    }
+
     public function generateCss()
     {
-        $css = '';
-        $css .= '@media (min-width: 1000px) {.container{ max-width: 1010px !important; }} ';
+        $css = '
+/* 640px <= width < 768px */
+@media only screen and (min-width: 640px) and (max-width: 767px) {
+
+/* Item grid
+-------------------------------------------------------------- */';
+
+$css .= $this->getCssGridItem(Configuration::get($this->configName.'_category_view_grid_column_count_768'));
+
+$css .='}
+/* end: 640px <= width < 768px */
+
+/* 480 <= width < 640px */
+@media only screen and (min-width: 480px) and (max-width: 639px) {
+
+/* Item grid
+-------------------------------------------------------------- */';
+$css .= $this->getCssGridItem(Configuration::get($this->configName.'_category_view_grid_column_count_640'));
+$css .='}
+/* end: 480 <= width < 640px */
+/* 320px <= width < 480px */
+@media only screen and (min-width: 320px) and (max-width: 479px) {
+/* Item grid
+-------------------------------------------------------------- */';
+$css .= $this->getCssGridItem(Configuration::get($this->configName.'_category_view_grid_column_count_480'));
+$css .='}
+/* end: 320px <= width < 480px */
+
+@media only screen and (max-width: 319px) {
+    /* Always show 1 column */
+    /* Important: added ".itemgrid" class to override other styles */
+    .itemgrid.itemgrid-adaptive .item { width:98%; clear:none !important; }
+}';
         if (Shop::getContext() == Shop::CONTEXT_GROUP)
-            $myFile = $this->local_path . "css/zoothemeconfig_g_".(int)$this->context->shop->getContextShopGroupID().".css";
+            $myFile = $this->local_path . "css/stylecf_".(int)$this->context->shop->getContextShopGroupID().".css";
         elseif (Shop::getContext() == Shop::CONTEXT_SHOP)
-            $myFile = $this->local_path . "css/zoothemeconfig_s_".(int)$this->context->shop->getContextShopID().".css";
+            $myFile = $this->local_path . "css/stylecf_".(int)$this->context->shop->getContextShopID().".css";
         $fh = fopen($myFile, 'w') or die("can't open file");
         fwrite($fh, $css);
         fclose($fh);
-
     }
 
 }
