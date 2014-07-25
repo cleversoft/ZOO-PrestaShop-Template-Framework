@@ -1,0 +1,4 @@
+function createCategoryTabSlider(selector)
+{
+
+}
