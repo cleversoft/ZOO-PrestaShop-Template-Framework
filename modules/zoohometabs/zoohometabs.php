@@ -56,8 +56,9 @@ class ZooHomeTabs extends Module {
 		if (!Configuration::updateValue('ZOO_tab_count', 10)
             || !Configuration::updateValue('ZOO_tab_sliderenabled', 0)
             || !Configuration::updateValue('ZOO_tab_slideresponsive', 1)
-            || !Configuration::updateValue('ZOO_tab_res_width', 250)
+            || !Configuration::updateValue('ZOO_tab_res_item', 250)
             || !Configuration::updateValue('ZOO_tab_res_breakpoints', '')
+            || !Configuration::updateValue('ZOO_tab_slide_lazyload', 1)
             || !Configuration::updateValue('ZOO_tab_item_column', 4)
             || !Configuration::updateValue('ZOO_tab_showspecial', 1)
             || !Configuration::updateValue('ZOO_tab_showcategory', 1)
@@ -82,19 +83,17 @@ class ZooHomeTabs extends Module {
 				$errors[] = $this->l('Invalid number of products');
 			else
 				Configuration::updateValue('ZOO_tab_count', (int)($count));
-
-
 				$items = Tools::getValue('items');
 			if (!(is_array($items) && Tools::getValue('showcategory')
                 && count($items)
                 && Configuration::updateValue('category_ids', (string)implode(',', $items))))
 				$errors[] =$this->l('Unable to update settings.');
-
 			
 			Configuration::updateValue('ZOO_tab_sliderenabled', (int)(Tools::getValue('sliderenabled')));
 			Configuration::updateValue('ZOO_tab_slideresponsive', (int)(Tools::getValue('slideresponsive')));
-			Configuration::updateValue('ZOO_tab_res_width', (int)(Tools::getValue('res_width')));
-			Configuration::updateValue('ZOO_tab_res_breakpoints', (int)(Tools::getValue('res_breakpoints')));
+			Configuration::updateValue('ZOO_tab_res_item', (int)(Tools::getValue('res_item')));
+			Configuration::updateValue('ZOO_tab_res_breakpoints', (Tools::getValue('res_breakpoints')));
+			Configuration::updateValue('ZOO_tab_slide_lazyload', (Tools::getValue('slide_lazyload')));
 			Configuration::updateValue('ZOO_tab_item_column', (int)(Tools::getValue('item_column')));
 			Configuration::updateValue('ZOO_tab_showfeatured', (int)(Tools::getValue('showfeatured')));
 			Configuration::updateValue('ZOO_tab_shownew', (int)(Tools::getValue('shownew')));
@@ -163,7 +162,7 @@ class ZooHomeTabs extends Module {
                             'query' => array(
                                 array(
                                     'id_option' => 1,
-                                    'name' => $this->l('By width')
+                                    'name' => $this->l('By items display')
                                 ),
                                 array(
                                     'id_option' => 0,
@@ -176,8 +175,8 @@ class ZooHomeTabs extends Module {
                     ),
                     array(
                         'type' => 'text',
-                        'label' => $this->l('Responsive Width'),
-                        'name' => 'res_width',
+                        'label' => $this->l('Responsive items display'),
+                        'name' => 'res_item',
                         'desc' => $this->l('Box-model width of individual carousel items, including horizontal borders and padding'),
                         'wrapper_hidden' => true,
                     ),
@@ -185,7 +184,26 @@ class ZooHomeTabs extends Module {
                         'type' => 'text',
                         'label' => $this->l('Breakpoints'),
                         'name' => 'res_breakpoints',
-                        'desc' => $this->l('Size:Column. Ex: 1600:6 1200:5 960:4 768:3 480:2 320:1'),
+                        'desc' => $this->l('Size:Column. Ex: [0, 2],[480, 2], [600, 3],[700, 3], [900, 4]'),
+                        'wrapper_hidden' => true,
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Enable lazyLoad'),
+                        'name' => 'slide_lazyload',
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
                         'wrapper_hidden' => true,
                         'suffix_wrapper' => true,
                     ),
@@ -193,7 +211,7 @@ class ZooHomeTabs extends Module {
                         'type' => 'text',
                         'label' => $this->l('Column'),
                         'name' => 'item_column',
-                        'desc' => $this->l('Limit number of items on row (only for widget product)'),
+                        'desc' => $this->l('Limit number of items on row'),
                         'preffix_wrapper' => 'slide_item_column',
                         'wrapper_hidden' => true,
                         'suffix_wrapper' => true,
@@ -314,8 +332,9 @@ class ZooHomeTabs extends Module {
 			'count' => Tools::getValue('ZOO_tab_count', Configuration::get('ZOO_tab_count')),
 			'sliderenabled' => Tools::getValue('ZOO_tab_sliderenabled', Configuration::get('ZOO_tab_sliderenabled')),
 			'slideresponsive' => Tools::getValue('ZOO_tab_slideresponsive', Configuration::get('ZOO_tab_slideresponsive')),
-			'res_width' => Tools::getValue('ZOO_tab_res_width', Configuration::get('ZOO_tab_res_width')),
+			'res_item' => Tools::getValue('ZOO_tab_res_item', Configuration::get('ZOO_tab_res_item')),
 			'res_breakpoints' => Tools::getValue('ZOO_tab_res_breakpoints', Configuration::get('ZOO_tab_res_breakpoints')),
+			'slide_lazyload' => Tools::getValue('ZOO_tab_slide_lazyload', Configuration::get('ZOO_tab_slide_lazyload')),
 			'item_column' => Tools::getValue('ZOO_tab_item_column', Configuration::get('ZOO_tab_item_column')),
 			'showfeatured' => Tools::getValue('ZOO_tab_showfeatured', Configuration::get('ZOO_tab_showfeatured')),
 			'shownew' => Tools::getValue('ZOO_tab_shownew', Configuration::get('ZOO_tab_shownew')),
@@ -325,7 +344,7 @@ class ZooHomeTabs extends Module {
 	}
 
 
-public function renderChoicesSelect()
+    public function renderChoicesSelect()
 	{
 		$spacer = str_repeat('&nbsp;', $this->spacer_size);
 		$items = $this->getMenuItems();
@@ -345,13 +364,11 @@ public function renderChoicesSelect()
 
 	private function getMenuItems()
 	{
-
-			$conf = Configuration::get('category_ids');
-			if (strlen($conf))
-				return explode(',', Configuration::get('category_ids'));
-			else
-				return array();
-
+        $conf = Configuration::get('category_ids');
+        if (strlen($conf))
+            return explode(',', Configuration::get('category_ids'));
+        else
+            return array();
 	}
 	private function makeMenuOption()
 	{
@@ -397,12 +414,23 @@ public function renderChoicesSelect()
 	public function hookDisplayHeader($params) {
 		if (!isset($this->context->controller->php_self) || $this->context->controller->php_self != 'index')
 			return;
-		$this -> context -> controller -> addCss($this->_path . 'zoohometabs.css');
-		$this -> context -> controller -> addJS($this->_path . 'zoohometabs.js');
+		$this -> context -> controller -> addCss($this->_path . 'css/zoohometabs.css');
+		$this -> context -> controller -> addJS($this->_path . 'js/zoohometabs.js');
         if((Configuration::get('ZOO_tab_sliderenabled')) == 1){
-            $this -> context -> controller -> addJS($this -> _path . 'owl.carousel.min.js');
-            $this -> context -> controller -> addJS($this -> _path . 'zoohometabs-slider.js');
+            $this -> context -> controller -> addCss($this->_path . 'css/owl.carousel.css');
+            $this -> context -> controller -> addCss($this->_path . 'css/owl.theme.css');
+            $this -> context -> controller -> addJS($this -> _path . 'js/owl.carousel.min.js');
+            $this -> context -> controller -> addJS($this -> _path . 'js/zoohometabs-slider.js');
         }
+        $module_settings = array(
+            "enableslide" => (Configuration::get('ZOO_tab_sliderenabled')),
+            "slideresponsive" => (Configuration::get('ZOO_tab_slideresponsive')),
+            "res_item" => (Configuration::get('ZOO_tab_res_item')),
+            "res_breakpoints" => (Configuration::get('ZOO_tab_res_breakpoints')),
+            "slide_lazyload" => (Configuration::get('ZOO_tab_slide_lazyload')),
+            "item_column" => (Configuration::get('ZOO_tab_item_column')),
+        );
+        $this->context->smarty->assign('module_vars', $module_settings);
 	}
 
 	public function hookDisplayHome($params) {

@@ -61,5 +61,13 @@
 			{/foreach}
 			{/if}
 		</div>
+        <script type="text/javascript">
+            var data_slide_hometabs = new Object();
+            data_slide_hometabs.slideresponsive = {$module_vars.slideresponsive};
+            data_slide_hometabs.res_item = {$module_vars.res_item};
+            data_slide_hometabs.res_breakpoints = [{$module_vars.res_breakpoints}];
+            data_slide_hometabs.slide_lazyload = {$module_vars.slide_lazyload};
+            data_slide_hometabs.item_column = {$module_vars.item_column};
+        </script>
 	</section>
 	<!-- /MODULE Homepage tabs  Products -->
