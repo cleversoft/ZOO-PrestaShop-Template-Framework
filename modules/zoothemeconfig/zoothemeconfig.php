@@ -270,6 +270,9 @@ class ZooThemeConfig extends Module
 	public function hookHeader($params)
 	{
         $id_shop = (int)$this->context->shop->id;
+        $this -> context -> controller -> addJS($this->_path . 'js/plugins.js');
+        $this -> context -> controller -> addCss($this->_path . 'css/plugins/carousel/owl.carousel.css');
+        $this -> context -> controller -> addCss($this->_path . 'css/plugins/carousel/owl.theme.css');
         $theme_settings = array(
             "product_columns" => (Configuration::get($this->configName.'_category_view_grid_column_count')),
         );
