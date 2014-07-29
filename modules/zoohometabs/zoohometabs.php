@@ -417,9 +417,6 @@ class ZooHomeTabs extends Module {
 		$this -> context -> controller -> addCss($this->_path . 'css/zoohometabs.css');
 		$this -> context -> controller -> addJS($this->_path . 'js/zoohometabs.js');
         if((Configuration::get('ZOO_tab_sliderenabled')) == 1){
-            $this -> context -> controller -> addCss($this->_path . 'css/owl.carousel.css');
-            $this -> context -> controller -> addCss($this->_path . 'css/owl.theme.css');
-            $this -> context -> controller -> addJS($this -> _path . 'js/owl.carousel.min.js');
             $this -> context -> controller -> addJS($this -> _path . 'js/zoohometabs-slider.js');
         }
         $module_settings = array(
